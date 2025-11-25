@@ -64,6 +64,7 @@ func main() {
 			return
 		}
 
+		log.Printf("Successfully pushed event ID=%s to Kafka", event.ID)
 		wHttp.WriteHeader(http.StatusOK)
 	})
 
