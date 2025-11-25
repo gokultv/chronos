@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/segmentio/kafka-go"
+	"github.com/google/uuid"
 	"chronos/pkg/types"
 )
 
@@ -40,6 +41,9 @@ func main() {
 		// Basic validation
 		if event.Timestamp == 0 {
 			event.Timestamp = time.Now().UnixMilli()
+		}
+		if event.ID == "" {
+			event.ID = uuid.New().String()
 		}
 
 		payload, err := json.Marshal(event)

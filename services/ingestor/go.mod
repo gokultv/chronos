@@ -2,7 +2,10 @@ module chronos/services/ingestor
 
 go 1.25.4
 
-require github.com/segmentio/kafka-go v0.4.49
+require (
+	github.com/google/uuid v1.6.0
+	github.com/segmentio/kafka-go v0.4.49
+)
 
 require (
 	github.com/klauspost/compress v1.15.9 // indirect

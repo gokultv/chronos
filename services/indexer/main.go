@@ -42,7 +42,7 @@ func main() {
 	}()
 
 	for {
-		m, err := r.ReadMessage(context.Background())
+		m, err := r.FetchMessage(context.Background())
 		if err != nil {
 			log.Printf("Error reading message: %v", err)
 			break
@@ -51,9 +51,19 @@ func main() {
 		var event types.Event
 		if err := json.Unmarshal(m.Value, &event); err != nil {
 			log.Printf("Error unmarshalling message: %v", err)
+			// Even if unmarshal fails, we should commit to avoid stuck loop? 
+			// Or maybe DLQ? For now, let's commit to move on.
+			if err := r.CommitMessages(context.Background(), m); err != nil {
+				log.Printf("Failed to commit message: %v", err)
+			}
 			continue
 		}
 
-		log.Printf("Indexed Event: TS=%d Source=%s Msg=%s\n", event.Timestamp, event.Source, event.Message)
+		log.Printf("Indexed Event: ID=%s TS=%d Source=%s Msg=%s\n", event.ID, event.Timestamp, event.Source, event.Message)
+
+		// Commit offset after processing
+		if err := r.CommitMessages(context.Background(), m); err != nil {
+			log.Printf("Failed to commit message: %v", err)
+		}
 	}
 }
