@@ -6,6 +6,9 @@ run-ingestor:
 run-indexer:
 	go run services/indexer/main.go
 
+run-query:
+	go run cmd/query/main.go $(ARGS)
+
 up:
 	docker compose up -d
 
