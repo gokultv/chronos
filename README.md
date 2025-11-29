@@ -27,11 +27,11 @@ graph LR
     Redpanda -- "Consumer Group" --> Worker2
     
     subgraph "Storage Layer"
-        Disk[("Disk / Object Storage")]
+        MinIO[("MinIO / S3 Bucket")]
     end
     
-    Worker1 -- "Flush (Gzip)" --> Disk
-    Worker2 -- "Flush (Gzip)" --> Disk
+    Worker1 -- "Upload (PutObject)" --> MinIO
+    Worker2 -- "Upload (PutObject)" --> MinIO
     
     subgraph "Query Layer"
         Coordinator[Coordinator Service]
@@ -39,7 +39,7 @@ graph LR
     end
     
     UI -- "HTTP /search" --> Coordinator
-    Coordinator -- "Scatter-Gather" --> Disk
+    Coordinator -- "Stream (GetObject)" --> MinIO
 ```
 
 ### Components
@@ -67,7 +67,7 @@ graph LR
 5.  **Storage Engine**:
     *   **Columnar**: Data is stored by column (Source, Message, Timestamp) for fast analytics.
     *   **Compressed**: Gzip compression reduces disk usage.
-    *   **Partitioned**: Files are named with `timestamp_nodeID` to prevent collisions.
+    *   **Cloud Native**: Segments are uploaded to S3/MinIO for decoupled storage.
 
 ---
 
