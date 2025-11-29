@@ -13,21 +13,21 @@ graph LR
     
     subgraph "Ingestion Layer"
         Ingestor[Ingestor Service]
-        Redpanda[(Redpanda / Kafka)]
+        Redpanda[("Redpanda / Kafka")]
     end
     
     Ingestor -- "Async Push" --> Redpanda
     
     subgraph "Indexing Layer (Worker Pool)"
-        Worker1[Indexer (Worker 1)]
-        Worker2[Indexer (Worker 2)]
+        Worker1["Indexer (Worker 1)"]
+        Worker2["Indexer (Worker 2)"]
     end
     
     Redpanda -- "Consumer Group" --> Worker1
     Redpanda -- "Consumer Group" --> Worker2
     
     subgraph "Storage Layer"
-        Disk[Disk / Object Storage]
+        Disk[("Disk / Object Storage")]
     end
     
     Worker1 -- "Flush (Gzip)" --> Disk
