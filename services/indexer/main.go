@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"chronos/pkg/storage"
@@ -40,6 +41,16 @@ func main() {
 		nodeID = "worker-unknown"
 	}
 	log.Printf("Indexer started with Node ID: %s", nodeID)
+
+	// Initialize S3 Client
+	s3Client, err := storage.NewS3Client("localhost:9000", "minioadmin", "minioadmin", "chronos-logs")
+	if err != nil {
+		log.Fatalf("Failed to initialize S3 client: %v", err)
+	}
+
+	if err := s3Client.EnsureBucket(); err != nil {
+		log.Fatalf("Failed to ensure bucket exists: %v", err)
+	}
 
 	// Handle graceful shutdown
 	sigchan := make(chan os.Signal, 1)
@@ -83,8 +94,18 @@ func main() {
 				log.Printf("Failed to flush block: %v", err)
 			} else {
 				log.Printf("Flushed %d events to %s", memTable.Size(), file)
-				// Reset MemTable
-				memTable = storage.NewBlock()
+
+				// Upload to S3
+				filename := filepath.Base(file)
+				err := s3Client.UploadFile(file, filename)
+				if err != nil {
+					log.Printf("Failed to upload to S3: %v", err)
+				} else {
+					// Optional: Delete local file after upload
+					// os.Remove(file)
+				}
+
+				memTable = storage.NewBlock() // Reset
 			}
 		}
 

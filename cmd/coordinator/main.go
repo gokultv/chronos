@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"chronos/pkg/storage"
 )
+
+var s3Client *storage.S3Client
 
 type SearchResult struct {
 	Timestamp string `json:"timestamp"`
@@ -32,6 +32,16 @@ type SearchStats struct {
 }
 
 func main() {
+	var err error
+	s3Client, err = storage.NewS3Client("localhost:9000", "minioadmin", "minioadmin", "chronos-logs")
+	if err != nil {
+		log.Fatalf("Failed to initialize S3 client: %v", err)
+	}
+
+	if err := s3Client.EnsureBucket(); err != nil {
+		log.Fatalf("Failed to ensure bucket exists: %v", err)
+	}
+
 	// Serve static files (UI)
 	fs := http.FileServer(http.Dir("./ui"))
 	http.Handle("/", fs)
@@ -49,15 +59,17 @@ func main() {
 func handleSearch(w http.ResponseWriter, r *http.Request) {
 	sourceFilter := r.URL.Query().Get("source")
 	containsFilter := r.URL.Query().Get("contains")
-	dataDir := "data"
+	// dataDir := "data" // Unused now that we use S3
 
 	if sourceFilter == "" && containsFilter == "" {
 		http.Error(w, "Please provide 'source' or 'contains' query parameter", http.StatusBadRequest)
 		return
 	}
 
-	files, err := filepath.Glob(filepath.Join(dataDir, "*.json.gz"))
+	// List files from S3
+	files, err := s3Client.ListFiles("")
 	if err != nil {
+		log.Printf("Failed to list S3 files: %v", err)
 		http.Error(w, "Failed to list data files", http.StatusInternalServerError)
 		return
 	}
@@ -122,14 +134,15 @@ func handleSearch(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func loadBlock(path string) (*storage.Block, error) {
-	f, err := os.Open(path)
+func loadBlock(objectName string) (*storage.Block, error) {
+	// Stream directly from S3
+	obj, err := s3Client.GetObject(objectName)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer obj.Close()
 
-	gr, err := gzip.NewReader(f)
+	gr, err := gzip.NewReader(obj)
 	if err != nil {
 		return nil, err
 	}
