@@ -35,6 +35,11 @@ func main() {
 	// Initialize MemTable (Block)
 	memTable := storage.NewBlock()
 	dataDir := "data"
+	nodeID := os.Getenv("NODE_ID")
+	if nodeID == "" {
+		nodeID = "worker-unknown"
+	}
+	log.Printf("Indexer started with Node ID: %s", nodeID)
 
 	// Handle graceful shutdown
 	sigchan := make(chan os.Signal, 1)
@@ -73,7 +78,7 @@ func main() {
 		// Check flush threshold
 		if memTable.Size() >= 100 {
 			log.Println("Flushing block to disk...")
-			file, err := memTable.Flush(dataDir)
+			file, err := memTable.Flush(dataDir, nodeID)
 			if err != nil {
 				log.Printf("Failed to flush block: %v", err)
 			} else {

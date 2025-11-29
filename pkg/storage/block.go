@@ -44,7 +44,7 @@ func (b *Block) Size() int {
 
 // Flush writes the block to a gzipped JSON file in the specified directory.
 // It returns the filename created.
-func (b *Block) Flush(dir string) (string, error) {
+func (b *Block) Flush(dir, nodeID string) (string, error) {
 	if b.Size() == 0 {
 		return "", nil
 	}
@@ -54,8 +54,8 @@ func (b *Block) Flush(dir string) (string, error) {
 		return "", fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	// Generate filename: segment_<timestamp>.json.gz
-	filename := fmt.Sprintf("segment_%d.json.gz", time.Now().UnixNano())
+	// Generate filename: segment_<timestamp>_<nodeID>.json.gz
+	filename := fmt.Sprintf("segment_%d_%s.json.gz", time.Now().UnixNano(), nodeID)
 	path := filepath.Join(dir, filename)
 
 	file, err := os.Create(path)

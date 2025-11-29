@@ -16,7 +16,7 @@ type Event struct {
 
 func main() {
 	url := "http://localhost:8081/ingest"
-	count := 120 // Enough to trigger flush (threshold is 100)
+	count := 250 // Enough to trigger flush on multiple workers (threshold is 100 each)
 
 	var wg sync.WaitGroup
 	start := time.Now()

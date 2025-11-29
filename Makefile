@@ -9,6 +9,9 @@ run-indexer:
 run-query:
 	go run cmd/query/main.go $(ARGS)
 
+run-coordinator:
+	go run cmd/coordinator/main.go
+
 up:
 	docker compose up -d
 
