@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="icon">⚡</span>
+                <h1>Chronos</h1>
+            </div>
+            <div class="status">
+                <span class="dot online"></span> Cluster Online
+            </div>
+        </header>
+
+        <main>
+            <div class="search-card glass">
+                <div class="input-group">
+                    <label>Source</label>
+                    <input type="text" id="sourceInput" placeholder="e.g. load-tester">
+                </div>
+                <div class="input-group">
+                    <label>Contains</label>
+                    <input type="text" id="containsInput" placeholder="e.g. error">
+                </div>
+                <button id="searchBtn">
+                    <span>Search Logs</span>
+                </button>
+            </div>
+
+            <div class="results-area">
+                <div class="stats-bar" id="statsBar" style="display: none;">
+                    <span>Scanned <b id="statEvents">0</b> events</span>
+                    <span>in <b id="statDuration">0s</b></span>
+                    <span>Found <b id="statMatches">0</b> matches</span>
+                </div>
+
+                <div class="table-container glass">
+                    <table id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th width="200">Timestamp</th>
+                                <th width="150">Source</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Results will be injected here -->
+                            <tr class="empty-state">
+                                <td colspan="3">Enter a query to start searching...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

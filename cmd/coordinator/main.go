@@ -32,6 +32,11 @@ type SearchStats struct {
 }
 
 func main() {
+	// Serve static files (UI)
+	fs := http.FileServer(http.Dir("./ui"))
+	http.Handle("/", fs)
+
+	// API Endpoint
 	http.HandleFunc("/search", handleSearch)
 
 	port := ":8082"
